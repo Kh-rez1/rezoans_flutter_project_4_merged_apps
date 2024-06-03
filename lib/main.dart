@@ -22,9 +22,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/login',
       routes: {
-        '/': (context) => const FirstScreen(),
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const FirstScreen(),
         '/aboutMe': (context) => const AboutMe(),
         '/education': (context) => const EducationPage(),
         '/workexperience': (context) => WorkExpPage(),
@@ -39,6 +40,145 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  String _errorMessage = '';
+
+  void _login() {
+    if (_formKey.currentState!.validate()) {
+      String email = _emailController.text;
+      String password = _passwordController.text;
+
+      if (email == 'demo@gmail.com' && password == 'demo') {
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        setState(() {
+          _errorMessage = 'Invalid email or password';
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 130, 175, 253),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Image.asset(
+                  'images/IMG_2085.jpg',
+                  height: 150,
+                ),
+                const SizedBox(height: 30),
+                const Text(
+                  'Welcome Back!',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    prefixIcon: const Icon(Icons.email),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    prefixIcon: const Icon(Icons.lock),
+                  ),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                if (_errorMessage.isNotEmpty)
+                  Text(
+                    _errorMessage,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _login,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 30.0),
+                    child: Text(
+                      'Login',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextButton(
+                  onPressed: () {
+                    // Navigate to the registration screen
+                  },
+                  child: const Text(
+                    'Don\'t have an account? Sign up',
+                    style: TextStyle(color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+void loogin() {
+  runApp(MaterialApp(
+    home: const LoginScreen(),
+    routes: {
+      '/home': (context) => const FirstScreen(),  // You need to implement HomeScreen
+    },
+  ));
+}
+
 class FirstScreen extends StatefulWidget {
   const FirstScreen({Key? key}) : super(key: key);
 
@@ -48,6 +188,10 @@ class FirstScreen extends StatefulWidget {
 
 class _FirstScreenState extends State<FirstScreen> {
   bool _isDarkMode = false;
+
+  void _logout() {
+    Navigator.pushReplacementNamed(context, '/login');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +209,12 @@ class _FirstScreenState extends State<FirstScreen> {
             ),
           ),
           backgroundColor: const Color.fromARGB(255, 205, 196, 196),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _logout,
+            ),
+          ],
         ),
         drawer: Drawer(
           child: ListView(
@@ -103,7 +253,7 @@ class _FirstScreenState extends State<FirstScreen> {
                 leading: const Icon(Icons.sunny_snowing),
                 title: const Text('Weather'),
                 onTap: () {
-                  Navigator.pushNamed(context, '/weather');
+                  Navigator.pushNamed(context,'/weather');
                 },
               ),
               ListTile(
@@ -129,9 +279,10 @@ class _FirstScreenState extends State<FirstScreen> {
           child: Container(
             padding: const EdgeInsets.fromLTRB(0, 80, 0, 0),
             decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("images/background.png"),
-                fit: BoxFit.cover,
+              gradient: LinearGradient(
+                colors: [Colors.purple, Colors.blue],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
               ),
             ),
             child: Column(
@@ -371,3 +522,5 @@ void medium_url() async {
     throw 'Could not launch $url';
   }
 }
+
+

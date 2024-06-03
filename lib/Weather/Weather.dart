@@ -11,21 +11,30 @@ class WeatherWidget extends StatefulWidget {
 class _WeatherWidgetState extends State<WeatherWidget> {
   late final WeatherFactory _wf;
   Weather? _weather;
+  List<Weather>? _forecast;
+  TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _wf = WeatherFactory('0006cfc2b3e0a12c46a2c815a76d3fb0');
-
-    _fetchWeatherData();
+    _fetchWeatherData("Dhaka");
   }
 
-  Future<void> _fetchWeatherData() async {
+  Future<void> _fetchWeatherData(String cityName) async {
     try {
-      _weather = await _wf.currentWeatherByCityName("Dhaka");
+      _weather = await _wf.currentWeatherByCityName(cityName);
+      _forecast = await _wf.fiveDayForecastByCityName(cityName);
       setState(() {});
     } catch (e) {
       print('Error fetching weather data: $e');
+    }
+  }
+
+  Future<void> _onSearch() async {
+    String cityName = _searchController.text;
+    if (cityName.isNotEmpty) {
+      await _fetchWeatherData(cityName);
     }
   }
 
@@ -33,12 +42,43 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey,
-      body: _buildUI(),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _searchBar(),
+            _buildUI(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _searchBar() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white,
+                hintText: 'Enter city name',
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(Icons.search),
+            onPressed: _onSearch,
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildUI() {
-    if (_weather == null) {
+    if (_weather == null || _forecast == null) {
       return const Center(
         child: CircularProgressIndicator(),
       );
@@ -49,7 +89,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         _weatherIcon(),
         _currentTemp(),
         _extraInfo(),
-        // Add forecast widget here
+        _forecastSection(),
       ],
     );
   }
@@ -157,6 +197,84 @@ class _WeatherWidgetState extends State<WeatherWidget> {
         ],
       ),
     );
+  }
+
+  Widget _forecastSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+          child: Text(
+            '7-Day Forecast',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 150, // Adjust the height according to your need
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: _forecast!.length,
+            itemBuilder: (context, index) {
+              Weather forecast = _forecast![index];
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    Text(
+  '${_getWeekday(forecast.date ?? DateTime.now())}',
+  style: const TextStyle(
+    color: Colors.white,
+    fontSize: 16,
+  ),
+),
+
+                    Image.network(
+                      "http://openweathermap.org/img/wn/${forecast.weatherIcon}@4x.png",
+                      height: 50,
+                      width: 50,
+                    ),
+                    Text(
+                      '${forecast.temperature?.celsius?.toStringAsFixed(0)}° C',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Define a method to get the weekday
+  String _getWeekday(DateTime dateTime) {
+    switch (dateTime.weekday) {
+      case 1:
+        return 'Monday';
+      case 2:
+        return 'Tuesday';
+      case 3:
+        return 'Wednesday';
+      case 4:
+        return 'Thursday';
+      case 5:
+        return 'Friday';
+      case 6:
+        return 'Saturday';
+      case 7:
+        return 'Sunday';
+      default:
+        return '';
+    }
   }
 }
 

@@ -122,14 +122,14 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           buttonPressed(buttonText);
         },
         style: ButtonStyle(
-          padding: MaterialStateProperty.all<EdgeInsetsGeometry>(
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
             const EdgeInsets.all(24.0),
           ),
-          textStyle: MaterialStateProperty.all<TextStyle>(
+          textStyle: WidgetStateProperty.all<TextStyle>(
             const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
           ),
-          backgroundColor: MaterialStateProperty.all<Color>(color),
-          foregroundColor: MaterialStateProperty.all<Color>(Colors.lightBlue),
+          backgroundColor: WidgetStateProperty.all<Color>(color),
+          foregroundColor: WidgetStateProperty.all<Color>(Colors.lightBlue),
         ),
         child: Text(buttonText),
       ),
@@ -219,7 +219,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               buildButton("", color: Colors.green),
             ]),
           ]),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Expanded(
             child: SingleChildScrollView(
               reverse: true,
@@ -238,6 +238,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 }
 
-void main() => runApp(MaterialApp(
+void main() => runApp(const MaterialApp(
   home: CalculatorScreen(),
 ));

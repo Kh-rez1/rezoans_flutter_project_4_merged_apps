@@ -11,10 +11,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'public Blog',
+      title: 'Public Blog',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.purple,
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontSize: 32.0, fontWeight: FontWeight.bold, color: Colors.white),
+          bodyLarge: TextStyle(fontSize: 16.0, color: Colors.black87),
+        ),
       ),
       home: const BlogHomePage(),
     );
@@ -48,21 +52,40 @@ class _BlogHomePageState extends State<BlogHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Flutter Blog'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purple, Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: ListView.builder(
         itemCount: articles.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(articles[index].title),
-            subtitle: Text('By ${articles[index].author}'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ArticleDetailPage(article: articles[index]),
-                ),
-              );
-            },
+          return Card(
+            margin: const EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15.0),
+            ),
+            elevation: 5,
+            child: ListTile(
+              title: Text(
+                articles[index].title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              subtitle: Text('By ${articles[index].author}'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ArticleDetailPage(article: articles[index]),
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -92,19 +115,47 @@ class ArticleDetailPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(article.title),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purple, Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'By ${article.author}',
-              style: const TextStyle(fontStyle: FontStyle.italic),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                offset: Offset(0, 3),
+                blurRadius: 6,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'By ${article.author}',
+                  style: const TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  article.content,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            Text(article.content),
-          ],
+          ),
         ),
       ),
     );
@@ -127,6 +178,15 @@ class _ArticleSubmissionPageState extends State<ArticleSubmissionPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Submit Article'),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.purple, Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -137,6 +197,7 @@ class _ArticleSubmissionPageState extends State<ArticleSubmissionPage> {
               controller: _titleController,
               decoration: const InputDecoration(
                 labelText: 'Title',
+                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16.0),
@@ -144,6 +205,7 @@ class _ArticleSubmissionPageState extends State<ArticleSubmissionPage> {
               controller: _contentController,
               decoration: const InputDecoration(
                 labelText: 'Content',
+                border: OutlineInputBorder(),
               ),
               maxLines: null, // Allow multiple lines for content
             ),
@@ -153,6 +215,12 @@ class _ArticleSubmissionPageState extends State<ArticleSubmissionPage> {
                 // Save the article when the button is pressed
                 _saveArticle();
               },
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 15.0), backgroundColor: Colors.purple,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
               child: const Text('Submit'),
             ),
           ],
@@ -161,7 +229,7 @@ class _ArticleSubmissionPageState extends State<ArticleSubmissionPage> {
     );
   }
 
- void _saveArticle() async {
+  void _saveArticle() async {
     // Retrieve input data
     String title = _titleController.text;
     String content = _contentController.text;
