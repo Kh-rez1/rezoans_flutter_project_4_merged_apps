@@ -1,5 +1,11 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:expressions/expressions.dart';
+
+void main() {
+  runApp(const MaterialApp(
+    home: CalculatorScreen(),
+  ));
+}
 
 class CalculatorScreen extends StatefulWidget {
   const CalculatorScreen({super.key});
@@ -10,126 +16,58 @@ class CalculatorScreen extends StatefulWidget {
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
   String output = "0";
-  String _output = "0";
-  double num1 = 0.0;
-  double num2 = 0.0;
-  String operand = "";
-  String history = "";
+  String expression = "";
+  bool shouldResetOutput = false;
 
   void buttonPressed(String buttonText) {
-    if (buttonText == "CLEAR") {
-      _output = "0";
-      num1 = 0.0;
-      num2 = 0.0;
-      operand = "";
-      history = "";
-    } else if (buttonText == "+" ||
-        buttonText == "-" ||
-        buttonText == "×" ||
-        buttonText == "÷") {
-      num1 = double.parse(output);
-      operand = buttonText;
-      _output = "0";
-    } else if (buttonText == ".") {
-      if (_output.contains(".")) {
-        return;
-      } else {
-        _output = _output + buttonText;
-      }
-    } else if (buttonText == "=") {
-      num2 = double.parse(output);
-      if (operand == "+") {
-        _output = (num1 + num2).toString();
-      }
-      if (operand == "-") {
-        _output = (num1 - num2).toString();
-      }
-      if (operand == "×") {
-        _output = (num1 * num2).toString();
-      }
-      if (operand == "÷") {
-        if (num2 != 0) {
-          _output = (num1 / num2).toString();
-        } else {
-          _output = "Error";
-        }
-      }
-      num1 = 0.0;
-      num2 = 0.0;
-      operand = "";
-    } else if (buttonText == "sin") {
-      _output = sin(double.parse(output) * (pi / 180)).toString();
-    } else if (buttonText == "cos") {
-      _output = cos(double.parse(output) * (pi / 180)).toString();
-    } else if (buttonText == "tan") {
-      _output = tan(double.parse(output) * (pi / 180)).toString();
-    } else if (buttonText == "√") {
-      _output = sqrt(double.parse(output)).toString();
-    } else if (buttonText == "log") {
-      _output = log(double.parse(output)).toString();
-    } else if (buttonText == "ln") {
-      _output = (log(double.parse(output)) / log(e)).toString();
-    } else if (buttonText == "^") {
-      num1 = double.parse(output);
-      operand = buttonText;
-      _output = "0";
-    } else if (buttonText == "^2") {
-      _output = (double.parse(output) * double.parse(output)).toString();
-    } else if (buttonText.endsWith(" to ")) {
-      operand = buttonText;
-    } else if (buttonText == "Convert") {
-      if (operand.isEmpty) {
-        return;
-      }
-      double value = double.parse(output);
-      switch (operand) {
-        case "m to cm":
-          _output = (value * 100).toString();
-          break;
-        case "cm to m":
-          _output = (value / 100).toString();
-          break;
-        case "kg to g":
-          _output = (value * 1000).toString();
-          break;
-        case "g to kg":
-          _output = (value / 1000).toString();
-          break;
-        case "°C to °F":
-          _output = ((value * 9 / 5) + 32).toString();
-          break;
-        case "°F to °C":
-          _output = ((value - 32) * 5 / 9).toString();
-          break;
-        default:
-          return;
-      }
-      operand = "";
-    } else {
-      _output = _output + buttonText;
-    }
-
     setState(() {
-      output = double.parse(_output).toStringAsFixed(2);
-      history += "$buttonText ";
+      if (buttonText == "CLEAR") {
+        expression = "";
+        output = "0";
+        shouldResetOutput = false;
+      } else if (buttonText == "=") {
+        try {
+          final parsedExpression = Expression.parse(expression);
+          const evaluator = ExpressionEvaluator();
+          final result = evaluator.eval(parsedExpression, {});
+          output = result.toString();
+          expression = output;
+        } catch (e) {
+          output = "Error";
+        }
+        shouldResetOutput = true;
+      } else {
+        if (shouldResetOutput) {
+          expression = buttonText;
+          shouldResetOutput = false;
+        } else {
+          expression += buttonText;
+        }
+        output = expression;
+      }
     });
   }
 
-  Widget buildButton(String buttonText, {Color color = Colors.white70}) {
+  Widget buildButton(String buttonText,
+      {Color color = Colors.white70, Function? onPressed}) {
     return Expanded(
       child: OutlinedButton(
         onPressed: () {
-          buttonPressed(buttonText);
+          if (onPressed != null) {
+            onPressed();
+          } else {
+            buttonPressed(buttonText);
+          }
         },
         style: ButtonStyle(
           padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
-            const EdgeInsets.all(24.0),
+            const EdgeInsets.all(20.0), // Adjusted padding
           ),
           textStyle: WidgetStateProperty.all<TextStyle>(
             const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
           ),
           backgroundColor: WidgetStateProperty.all<Color>(color),
-          foregroundColor: WidgetStateProperty.all<Color>(Colors.lightBlue),
+          foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
         ),
         child: Text(buttonText),
       ),
@@ -143,9 +81,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         centerTitle: true,
         title: const Text(
           "Scientific Calculator",
-          style: TextStyle(color: Colors.lightBlue),
+          style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.teal,
       ),
       body: Column(
         children: <Widget>[
@@ -159,7 +97,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               output,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                color: Colors.lightBlue,
+                color: Colors.teal,
                 fontSize: 40.0,
               ),
             ),
@@ -167,16 +105,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           const Expanded(child: Divider()),
           Column(children: [
             Row(children: <Widget>[
-              buildButton("sin"),
-              buildButton("cos"),
-              buildButton("tan"),
-              buildButton("√"),
+              buildButton("sin", color: Colors.tealAccent),
+              buildButton("cos", color: Colors.tealAccent),
+              buildButton("tan", color: Colors.tealAccent),
+              buildButton("(", color: Colors.tealAccent),
+              buildButton(")", color: Colors.tealAccent),
             ]),
             Row(children: <Widget>[
-              buildButton("log"),
-              buildButton("ln"),
-              buildButton("^2"),
-              buildButton("÷"),
+              buildButton("log", color: Colors.tealAccent),
+              buildButton("ln", color: Colors.tealAccent),
+              buildButton("^2", color: Colors.tealAccent),
+              buildButton("√", color: Colors.tealAccent),
+              buildButton("÷", color: Colors.orange),
             ]),
             Row(children: <Widget>[
               buildButton("7"),
@@ -199,37 +139,212 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             Row(children: <Widget>[
               buildButton("."),
               buildButton("0"),
-              buildButton("00"),
-              buildButton("="),
+              buildButton("CLEAR", color: Colors.orange),
+              buildButton("=", color: Colors.orange),
             ]),
             Row(children: <Widget>[
-              buildButton("CLEAR", color: Colors.red),
-              buildButton("Convert", color: Colors.green),
+              buildButton("CLEAR", color: Colors.redAccent),
+              buildButton("Unit Conversion", color: Colors.purpleAccent,
+                  onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const UnitConversionScreen()),
+                );
+              }),
+            ])
+          ]),
+        ],
+      ),
+    );
+  }
+}
+
+class UnitConversionScreen extends StatefulWidget {
+  const UnitConversionScreen({super.key});
+
+  @override
+  _UnitConversionScreenState createState() => _UnitConversionScreenState();
+}
+
+class _UnitConversionScreenState extends State<UnitConversionScreen> {
+  String input = "";
+  String output = "";
+  String selectedConversion = "m to km";
+
+  final List<String> conversionOptions = [
+    "m to km",
+    "km to m",
+    "m to miles",
+    "miles to m",
+    "kg to lbs",
+    "lbs to kg",
+    "C to F",
+    "F to C",
+    "L to gallons",
+    "gallons to L",
+  ];
+
+  void convert() {
+    double inputValue = double.tryParse(input) ?? 0;
+    double outputValue;
+
+    switch (selectedConversion) {
+      case "m to km":
+        outputValue = inputValue / 1000;
+        break;
+      case "km to m":
+        outputValue = inputValue * 1000;
+        break;
+      case "m to miles":
+        outputValue = inputValue / 1609.34;
+        break;
+      case "miles to m":
+        outputValue = inputValue * 1609.34;
+        break;
+      case "kg to lbs":
+        outputValue = inputValue * 2.20462;
+        break;
+      case "lbs to kg":
+        outputValue = inputValue / 2.20462;
+        break;
+      case "C to F":
+        outputValue = (inputValue * 9 / 5) + 32;
+        break;
+      case "F to C":
+        outputValue = (inputValue - 32) * 5 / 9;
+        break;
+      case "L to gallons":
+        outputValue = inputValue / 3.78541;
+        break;
+      case "gallons to L":
+        outputValue = inputValue * 3.78541;
+        break;
+      default:
+        outputValue = inputValue;
+    }
+
+    setState(() {
+      output = outputValue.toStringAsFixed(2);
+    });
+  }
+
+  Widget buildButton(String buttonText, {Color color = Colors.white70}) {
+    return Expanded(
+      child: OutlinedButton(
+        onPressed: () {
+          setState(() {
+            if (buttonText == "CLEAR") {
+              input =
+                  input.isNotEmpty ? input.substring(0, input.length - 1) : "";
+            } else {
+              input = input + buttonText;
+            }
+          });
+        },
+        style: ButtonStyle(
+          padding: WidgetStateProperty.all<EdgeInsetsGeometry>(
+            const EdgeInsets.all(20.0), // Adjusted padding
+          ),
+          textStyle: WidgetStateProperty.all<TextStyle>(
+            const TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+          ),
+          backgroundColor: WidgetStateProperty.all<Color>(color),
+          foregroundColor: WidgetStateProperty.all<Color>(Colors.black),
+        ),
+        child: Text(buttonText),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Unit Conversion",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.teal,
+      ),
+      body: Column(
+        children: <Widget>[
+          Container(
+            alignment: Alignment.centerRight,
+            padding: const EdgeInsets.symmetric(
+              vertical: 65,
+              horizontal: 30,
+            ),
+            child: Text(
+              input,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.teal,
+                fontSize: 40.0,
+              ),
+            ),
+          ),
+          const Expanded(child: Divider()),
+          Column(children: [
+            Row(children: <Widget>[
+              buildButton("7"),
+              buildButton("8"),
+              buildButton("9"),
             ]),
             Row(children: <Widget>[
-              buildButton("m to cm"),
-              buildButton("cm to m"),
-              buildButton("kg to g"),
-              buildButton("g to kg"),
+              buildButton("4"),
+              buildButton("5"),
+              buildButton("6"),
             ]),
             Row(children: <Widget>[
-              buildButton("°C to °F"),
-              buildButton("°F to °C"),
-              buildButton(""),
-              buildButton("", color: Colors.green),
+              buildButton("1"),
+              buildButton("2"),
+              buildButton("3"),
+            ]),
+            Row(children: <Widget>[
+              buildButton("."),
+              buildButton("0"),
+              buildButton("CLEAR", color: Colors.redAccent),
             ]),
           ]),
-          const SizedBox(height: 20),
-          Expanded(
-            child: SingleChildScrollView(
-              reverse: true,
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  history,
-                  textAlign: TextAlign.right,
+          Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              children: [
+                DropdownButton<String>(
+                  value: selectedConversion,
+                  items: conversionOptions.map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedConversion = newValue!;
+                    });
+                  },
                 ),
-              ),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: convert,
+                        child: const Text("Convert"),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "Output: $output",
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -237,7 +352,3 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     );
   }
 }
-
-void main() => runApp(const MaterialApp(
-  home: CalculatorScreen(),
-));

@@ -12,7 +12,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
   late final WeatherFactory _wf;
   Weather? _weather;
   List<Weather>? _forecast;
-  TextEditingController _searchController = TextEditingController();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -61,7 +61,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           Expanded(
             child: TextField(
               controller: _searchController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 filled: true,
                 fillColor: Colors.white,
                 hintText: 'Enter city name',
@@ -69,7 +69,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             onPressed: _onSearch,
           ),
         ],
@@ -203,8 +203,8 @@ class _WeatherWidgetState extends State<WeatherWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.0),
           child: Text(
             '7-Day Forecast',
             style: TextStyle(
@@ -226,7 +226,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
                 child: Column(
                   children: [
                     Text(
-  '${_getWeekday(forecast.date ?? DateTime.now())}',
+  _getWeekday(forecast.date ?? DateTime.now()),
   style: const TextStyle(
     color: Colors.white,
     fontSize: 16,

@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         '/skills': (context) => Skills(),
         '/project': (context) => const project(),
         '/calculator': (context) => const CalculatorScreen(),
-        '/quiz': (context) => const QuizScreen(),
+        '/quiz': (context) => const ModeSelectionScreen(),
         '/weather': (context) => const WeatherWidget(),
         '/comments': (context) => const BlogHomePage(),
       },
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       String email = _emailController.text;
       String password = _passwordController.text;
 
-      if (email == 'demo@gmail.com' && password == 'demo') {
+      if (email == 'khandaker@gmail.com' && password == 'demo') {
         Navigator.pushReplacementNamed(context, '/home');
       } else {
         setState(() {
